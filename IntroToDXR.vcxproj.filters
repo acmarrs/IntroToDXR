@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{b6bf48b5-5b3d-4b2a-98c7-63450b6f7ac1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include">
+      <UniqueIdentifier>{1d9859fa-b088-4b58-99dc-8eca318d73b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{9dbee71b-9a2f-4b36-99bc-b3c7d6e27896}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\thirdparty">
+      <UniqueIdentifier>{972530fc-521c-4b6b-8a0e-6d691ab12fe4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\thirdparty\dxc">
+      <UniqueIdentifier>{ae5fb25b-e0ab-40f7-bca4-c07f9f1f09d1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Window.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="shaders\ClosestHit.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\Miss.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\RayGen.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\Common.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Window.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\thirdparty\stb_image.h">
+      <Filter>Include\thirdparty</Filter>
+    </ClInclude>
+    <ClInclude Include="include\thirdparty\tiny_obj_loader.h">
+      <Filter>Include\thirdparty</Filter>
+    </ClInclude>
+    <ClInclude Include="include\thirdparty\dxc\dxcapi.h">
+      <Filter>Include\thirdparty\dxc</Filter>
+    </ClInclude>
+    <ClInclude Include="include\thirdparty\dxc\dxcapi.use.h">
+      <Filter>Include\thirdparty\dxc</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Structures.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Common.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\thirdparty\d3dx12.h">
+      <Filter>Include\thirdparty</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

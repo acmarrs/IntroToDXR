@@ -1,0 +1,7 @@
+newmtl cinema_mat
+	Ka 1 1 1
+	Kd 1 1 1
+	d 1
+	Ns 0
+	illum 1
+	map_Kd -texres 8192 textures\cinema.jpg
