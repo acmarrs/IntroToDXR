@@ -4,9 +4,7 @@ A barebones application to get you jump started with DirectX Raytracing (DXR)! U
 
 The code sample traces primary rays and includes a simple hit shader that samples a texture. 
 
-![Release Mode](C:\p4\sw\devrel\Playpen\amarrs\publication\rtg\IntroToDXR\IntroToDXR.png "Release Mode Output")
-
-<!-- ![Debug Mode](C:\p4\sw\devrel\Playpen\amarrs\publication\rtg\IntroToDXR\IntroToDXR-Debug.png "Debug Mode Output") -->
+![Release Mode](https://github.com/acmarrs/IntroToDXR/blob/master/IntroToDXR.png "Release Mode Output")
 
 ## Requirements
 
