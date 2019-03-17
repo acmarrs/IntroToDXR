@@ -543,7 +543,7 @@ void Create_Device(D3D12Global &d3d)
 
 		if (SUCCEEDED(D3D12CreateDevice(d3d.adapter, D3D_FEATURE_LEVEL_12_1, _uuidof(ID3D12Device5), (void**)&d3d.device)))
 		{
-			// Check if the adapter supports ray tracing, but don't create the actual device yet.
+			// Check if the device supports ray tracing.
 			D3D12_FEATURE_DATA_D3D12_OPTIONS5 features = {};
 			HRESULT hr = d3d.device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &features, sizeof(features));
 			if (FAILED(hr) || features.RaytracingTier < D3D12_RAYTRACING_TIER_1_0)
@@ -852,11 +852,11 @@ void Create_Bottom_Level_AS(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &re
 */
 void Create_Top_Level_AS(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &resources) 
 {
-	// Describe the TLAS instance(s)
+	// Describe the TLAS geometry instance(s)
 	D3D12_RAYTRACING_INSTANCE_DESC instanceDesc = {};
 	instanceDesc.InstanceID = 0;																		// This value is exposed to shaders as SV_InstanceID
 	instanceDesc.InstanceContributionToHitGroupIndex = 0;
-	instanceDesc.InstanceMask = 1;
+	instanceDesc.InstanceMask = 0xFF;
 	instanceDesc.Transform[0][0] = instanceDesc.Transform[1][1] = instanceDesc.Transform[2][2] = 1;		// identity transform
 	instanceDesc.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
 	instanceDesc.AccelerationStructure = dxr.BLAS.pResult->GetGPUVirtualAddress();
@@ -1149,7 +1149,7 @@ void Create_Pipeline_State_Object(D3D12Global &d3d, DXRGlobal &dxr)
 	// Create a list of the shader export names that use the root signature
 	const WCHAR* rootSigExports[] = { L"RayGen_12", L"HitGroup", L"Miss_5" };
 
-	// Add a state subobject for the association between the RayGen shader and the RayGen root signature
+	// Add a state subobject for the association between the RayGen shader and the local root signature
 	D3D12_SUBOBJECT_TO_EXPORTS_ASSOCIATION rayGenShaderRootSigAssociation = {};
 	rayGenShaderRootSigAssociation.NumExports = _countof(rootSigExports);
 	rayGenShaderRootSigAssociation.pExports = rootSigExports;
@@ -1199,22 +1199,22 @@ void Create_Shader_Table(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &resou
 {
 	/*
 	The Shader Table layout is as follows:
-	Entry 0 - Ray Generation program
-	Entry 1 - Miss program
-	Entry 2 - Closest Hit program
-	All entries in the SBT must have the same size, so we will choose it base on the largest required entry.
-	The ray-gen program requires the largest entry - sizeof(program identifier) + 4 bytes for a descriptor-table + 8 bytes for a constant buffer descriptor.
+	Entry 0 - Ray Generation shader
+	Entry 1 - Miss shader
+	Entry 2 - Closest Hit shader
+	All shader records in the Shader Table must have the same size, so shader record size will be based on the largest required entry.
+	The ray generation program requires the largest entry: sizeof(shader identifier) + 8 bytes for a descriptor table.
 	The entry size must be aligned up to D3D12_RAYTRACING_SHADER_BINDING_TABLE_RECORD_BYTE_ALIGNMENT
 	*/
 
-	uint32_t progIdSize = 32;
+	uint32_t shaderIdSize = 32;
 	uint32_t sbtSize = 0;
 
-	dxr.sbtEntrySize = progIdSize;
+	dxr.sbtEntrySize = shaderIdSize;
 	dxr.sbtEntrySize += 8;					// CBV/SRV/UAV descriptor table
 	dxr.sbtEntrySize = ALIGN(D3D12_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT, dxr.sbtEntrySize);
 
-	sbtSize = (dxr.sbtEntrySize * 3);
+	sbtSize = (dxr.sbtEntrySize * 3);		// 3 shader records in the table
 	sbtSize = ALIGN(D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT, sbtSize);
 
 	// Create the shader table buffers
@@ -1224,24 +1224,24 @@ void Create_Shader_Table(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &resou
 	// Map the buffer
 	uint8_t* pData;
 	HRESULT hr = dxr.sbt->Map(0, nullptr, (void**)&pData);
-	Utils::Validate(hr, L"Error: failed to map shader binding table!");
+	Utils::Validate(hr, L"Error: failed to map shader table!");
 
-	// Entry 0 - Ray Generation program and local root argument data (descriptor table)
-	memcpy(pData, dxr.rtpsoInfo->GetShaderIdentifier(L"RayGen_12"), progIdSize);
+	// Entry 0 - Ray Generation program and local root argument data (descriptor table with constant buffer and IB/VB pointers)
+	memcpy(pData, dxr.rtpsoInfo->GetShaderIdentifier(L"RayGen_12"), shaderIdSize);
 
 	// Set the root arguments data. Point to start of descriptor heap
-	*reinterpret_cast<D3D12_GPU_DESCRIPTOR_HANDLE*>(pData + progIdSize) = resources.cbvSrvUavHeap->GetGPUDescriptorHandleForHeapStart();
+	*reinterpret_cast<D3D12_GPU_DESCRIPTOR_HANDLE*>(pData + shaderIdSize) = resources.cbvSrvUavHeap->GetGPUDescriptorHandleForHeapStart();
 
 	// Entry 1 - Miss program (no local root arguments to set)
 	pData += dxr.sbtEntrySize;
-	memcpy(pData, dxr.rtpsoInfo->GetShaderIdentifier(L"Miss_5"), progIdSize);
+	memcpy(pData, dxr.rtpsoInfo->GetShaderIdentifier(L"Miss_5"), shaderIdSize);
 
-	// Entry 2 - Closest Hit program and local root argument data (descriptor table, constant buffer, and IB/VB pointers)
+	// Entry 2 - Closest Hit program and local root argument data (descriptor table with constant buffer and IB/VB pointers)
 	pData += dxr.sbtEntrySize;
-	memcpy(pData, dxr.rtpsoInfo->GetShaderIdentifier(L"HitGroup"), progIdSize);
+	memcpy(pData, dxr.rtpsoInfo->GetShaderIdentifier(L"HitGroup"), shaderIdSize);
 
 	// Set the root arg data. Point to start of descriptor heap
-	*reinterpret_cast<D3D12_GPU_DESCRIPTOR_HANDLE*>(pData + progIdSize) = resources.cbvSrvUavHeap->GetGPUDescriptorHandleForHeapStart();
+	*reinterpret_cast<D3D12_GPU_DESCRIPTOR_HANDLE*>(pData + shaderIdSize) = resources.cbvSrvUavHeap->GetGPUDescriptorHandleForHeapStart();
 
 	// Unmap
 	dxr.sbt->Unmap(0, nullptr);

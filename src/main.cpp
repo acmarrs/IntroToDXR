@@ -82,7 +82,7 @@ public:
 		DXR::Create_Bottom_Level_AS(d3d, dxr, resources, model);
 		DXR::Create_Top_Level_AS(d3d, dxr, resources);
 		DXR::Create_DXR_Output(d3d, resources);
-		DXR::Create_CBVSRVUAV_Heap(d3d, dxr, resources, model);		
+		DXR::Create_CBVSRVUAV_Heap(d3d, dxr, resources, model);	
 		DXR::Create_RayGen_Program(d3d, dxr, shaderCompiler);
 		DXR::Create_Miss_Program(d3d, dxr, shaderCompiler);
 		DXR::Create_Closest_Hit_Program(d3d, dxr, shaderCompiler);
