@@ -34,7 +34,6 @@ void RayGen()
 {
 	uint2 LaunchIndex = DispatchRaysIndex().xy;
 	uint2 LaunchDimensions = DispatchRaysDimensions().xy;
-	uint  PixelLinearIndex = LaunchIndex.x + (LaunchIndex.y * LaunchDimensions.x);
 
 	float2 d = (((LaunchIndex.xy + 0.5f) / resolution.xy) * 2.f - 1.f);
 	float aspectRatio = (resolution.x / resolution.y);
@@ -48,7 +47,7 @@ void RayGen()
 
 	// Trace the ray
 	HitInfo payload;
-	payload.ShadedColorAndHitT = float4(1, 0, 0, 0);
+	payload.ShadedColorAndHitT = float4(0.f, 0.f, 0.f, 0.f);
 
 	TraceRay(
 		SceneBVH,
