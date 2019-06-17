@@ -29,7 +29,7 @@
 
 struct HitInfo
 {
-	float4 ShadedColorAndHitT : SHADED_COLOR_AND_HIT_T;
+	float4 ShadedColorAndHitT;
 };
 
 struct Attributes 
