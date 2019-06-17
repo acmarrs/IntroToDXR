@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, NVIDIA CORPORATION. All rights reserved.
+/* Copyright (c) 2018-2019, NVIDIA CORPORATION. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,7 +32,8 @@ struct HitInfo
 	float4 ShadedColorAndHitT : SHADED_COLOR_AND_HIT_T;
 };
 
-struct Attributes {
+struct Attributes 
+{
 	float2 uv;
 };
 

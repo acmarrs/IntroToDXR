@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, NVIDIA CORPORATION. All rights reserved.
+/* Copyright (c) 2018-2019, NVIDIA CORPORATION. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,13 +30,13 @@
 /**
  * Windows message loop.
  */
-LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam ) {
+LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam ) 
+{
 	PAINTSTRUCT ps;
-    HDC hdc;
-
-    switch( message ) {
+    switch( message ) 
+	{
         case WM_PAINT:
-            hdc = BeginPaint( hWnd, &ps );
+            BeginPaint( hWnd, &ps );
             EndPaint( hWnd, &ps );
             break;
         case WM_DESTROY:
@@ -54,8 +54,8 @@ namespace Window
 /**
  * Create a new window.
 */
-HRESULT Create( LONG width, LONG height, HINSTANCE& instance, HWND& window, LPCWSTR title ) {
-    
+HRESULT Create( LONG width, LONG height, HINSTANCE& instance, HWND& window, LPCWSTR title ) 
+{
 	// Register the window class
 	WNDCLASSEX wcex;
 	wcex.cbSize = sizeof(WNDCLASSEX);
@@ -71,7 +71,8 @@ HRESULT Create( LONG width, LONG height, HINSTANCE& instance, HWND& window, LPCW
 	wcex.hIcon = nullptr;
 	wcex.hIconSm = nullptr;
 
-	if (!RegisterClassEx(&wcex)) {
+	if (!RegisterClassEx(&wcex)) 
+	{
 		throw std::runtime_error("Failed to register window!");
 	}
 
@@ -81,7 +82,6 @@ HRESULT Create( LONG width, LONG height, HINSTANCE& instance, HWND& window, LPCW
 	GetWindowRect(hDesktop, &desktop);
 
 	int x = (desktop.right - width) / 2;
-	int y = (desktop.bottom - height) / 2;
 
 	// Create the window
 	RECT rc = { 0, 0, width, height };

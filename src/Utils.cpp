@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, NVIDIA CORPORATION. All rights reserved.
+/* Copyright (c) 2018-2019, NVIDIA CORPORATION. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,8 +37,10 @@ namespace std
 		seed ^= hash;
 	}
 
-	template<> struct hash<Vertex> {
-		size_t operator()(Vertex const &vertex) const {
+	template<> struct hash<Vertex> 
+	{
+		size_t operator()(Vertex const &vertex) const 
+		{
 			size_t seed = 0;
 			hash<float> hasher;
 			hash_combine(seed, hasher(vertex.position.x));
@@ -110,7 +112,8 @@ HRESULT ParseCommandLine(LPWSTR lpCmdLine, ConfigInfo &config)
 			i++;
 		}
 	}
-	else {
+	else 
+	{
 		MessageBox(NULL, L"Incorrect command line usage!", L"Error", MB_OK);
 		return E_FAIL;
 	}

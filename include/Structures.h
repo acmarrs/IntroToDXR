@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, NVIDIA CORPORATION. All rights reserved.
+/* Copyright (c) 2018-2019, NVIDIA CORPORATION. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -49,13 +49,15 @@ static bool CompareVector2WithEpsilon(const XMFLOAT2& lhs, const XMFLOAT2& rhs)
 // Global Structures
 //--------------------------------------------------------------------------------------
 
-struct ConfigInfo {
+struct ConfigInfo 
+{
 	int			width;
 	int			height;
 	string		model;
 	HINSTANCE	instance;
 
-	ConfigInfo() {
+	ConfigInfo() 
+	{
 		width = 640;
 		height = 360;
 		model = "";
@@ -68,27 +70,32 @@ struct Vertex
 	XMFLOAT3 position;
 	XMFLOAT2 uv;
 
-	bool operator==(const Vertex &v) const {
-		if (CompareVector3WithEpsilon(position, v.position)) {
+	bool operator==(const Vertex &v) const 
+	{
+		if (CompareVector3WithEpsilon(position, v.position)) 
+		{
 			if (CompareVector2WithEpsilon(uv, v.uv)) return true;
 			return true;
 		}
 		return false;
 	}
 
-	Vertex& operator=(const Vertex& v) {
+	Vertex& operator=(const Vertex& v) 
+	{
 		position = v.position;
 		uv = v.uv;
 		return *this;
 	}
 };
 
-struct Material {
+struct Material 
+{
 	string name;
 	string texturePath;
 	float  textureResolution;
 
-	Material() {
+	Material() 
+	{
 		name = "defaultMaterial";
 		texturePath = "";
 		textureResolution = 512;
@@ -109,7 +116,8 @@ struct TextureInfo
 	int stride;
 };
 
-struct MaterialCB {
+struct MaterialCB 
+{
 	XMFLOAT4 resolution;
 };
 
@@ -119,7 +127,8 @@ struct ViewCB
 	XMFLOAT4 viewOriginAndTanHalfFovY;
 	XMFLOAT2 resolution;
 
-	ViewCB() {
+	ViewCB() 
+	{
 		view = XMMatrixIdentity();
 		viewOriginAndTanHalfFovY = XMFLOAT4(0, 0.f, 0.f, 0.f);
 		resolution = XMFLOAT2(1280, 720);

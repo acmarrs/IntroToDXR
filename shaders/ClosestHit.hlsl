@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, NVIDIA CORPORATION. All rights reserved.
+/* Copyright (c) 2018-2019, NVIDIA CORPORATION. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,8 +30,7 @@
 // ---[ Closest Hit Shader ]---
 
 [shader("closesthit")]
-void ClosestHit(inout HitInfo payload : SV_RayPayload,
-				Attributes attrib : SV_IntersectionAttributes)
+void ClosestHit(inout HitInfo payload, Attributes attrib)
 {
 	uint triangleIndex = PrimitiveIndex();
 	float3 barycentrics = float3((1.0f - attrib.uv.x - attrib.uv.y), attrib.uv.x, attrib.uv.y);
