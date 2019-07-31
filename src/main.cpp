@@ -40,7 +40,7 @@
 /**
  * Your ray tracing application!
  */
-class DXRApplication 
+class DXRApplication
 {
 public:
 	
@@ -71,7 +71,6 @@ public:
 		// Create common resources
 		D3DResources::Create_Descriptor_Heaps(d3d, resources);
 		D3DResources::Create_BackBuffer_RTV(d3d, resources);
-		D3DResources::Create_Samplers(d3d, resources);		
 		D3DResources::Create_Vertex_Buffer(d3d, resources, model);
 		D3DResources::Create_Index_Buffer(d3d, resources, model);
 		D3DResources::Create_Texture(d3d, resources, material);

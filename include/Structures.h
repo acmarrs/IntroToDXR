@@ -231,10 +231,6 @@ struct D3D12Resources
 
 	ID3D12DescriptorHeap*							rtvHeap;
 	ID3D12DescriptorHeap*							cbvSrvUavHeap;
-	ID3D12DescriptorHeap*							samplerHeap;
-
-	ID3D12Resource*									transform;
-	ID3D12Resource*									transformUploadHeap;
 
 	ID3D12Resource*									texture;
 	ID3D12Resource*									textureUploadHeap;
@@ -363,8 +359,8 @@ struct DXRGlobal
 	AccelerationStructureBuffer						BLAS;
 	uint64_t										tlasSize;
 
-	ID3D12Resource*									sbt;
-	uint32_t										sbtEntrySize;
+	ID3D12Resource*									shaderTable;
+	uint32_t										shaderTableRecordSize;
 
 	RtProgram										rgs;
 	RtProgram										miss;
