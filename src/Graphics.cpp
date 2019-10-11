@@ -1179,17 +1179,17 @@ void Create_Shader_Table(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &resou
 	Entry 2 - Closest Hit shader
 	All shader records in the Shader Table must have the same size, so shader record size will be based on the largest required entry.
 	The ray generation program requires the largest entry: 
-		32 bytes - sizeof(program identifier)
+		32 bytes - D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES 
 	  +  8 bytes - a CBV/SRV/UAV descriptor table pointer (64-bits)
 	  = 40 bytes ->> aligns to 64 bytes
 	The entry size must be aligned up to D3D12_RAYTRACING_SHADER_BINDING_TABLE_RECORD_BYTE_ALIGNMENT
 	*/
 
-	uint32_t shaderIdSize = 32;
+	uint32_t shaderIdSize = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 	uint32_t shaderTableSize = 0;
 
 	dxr.shaderTableRecordSize = shaderIdSize;
-	dxr.shaderTableRecordSize += 8;					// CBV/SRV/UAV descriptor table
+	dxr.shaderTableRecordSize += 8;							// CBV/SRV/UAV descriptor table
 	dxr.shaderTableRecordSize = ALIGN(D3D12_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT, dxr.shaderTableRecordSize);
 
 	shaderTableSize = (dxr.shaderTableRecordSize * 3);		// 3 shader records in the table

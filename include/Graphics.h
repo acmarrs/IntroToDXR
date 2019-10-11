@@ -49,7 +49,7 @@ static const D3D12_HEAP_PROPERTIES DefaultHeapProperties =
 
 namespace D3DResources
 {
-	void Create_Buffer(D3D12Global &d3d, D3D12BufferCreateInfo& info, ID3D12Resource** ppResource);
+	void Create_Buffer(D3D12Global &d3d, D3D12BufferCreateInfo &info, ID3D12Resource** ppResource);
 	void Create_Texture(D3D12Global &d3d, D3D12Resources &resources, Material &material);
 	void Create_Vertex_Buffer(D3D12Global &d3d, D3D12Resources &resources, Model &model);
 	void Create_Index_Buffer(D3D12Global &d3d, D3D12Resources &resources, Model &model);

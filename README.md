@@ -8,9 +8,9 @@ The code sample traces primary rays and includes a simple hit shader that sample
 
 ## Requirements
 
-* Windows 10 v1809, "October 2018 Update" (RS5)
-* Windows 10 SDK v1809 (10.0.17763.0). [Download it here.](https://developer.microsoft.com/en-us/windows/downloads/sdk-archive)
-* Visual Studio 2017 or VS Code
+* Windows 10 v1809, "October 2018 Update" (RS5) or later
+* Windows 10 SDK v1809 (10.0.17763.0) or later. [Download it here.](https://developer.microsoft.com/en-us/windows/downloads/sdk-archive) 
+* Visual Studio 2017, 2019, or VS Code
 
 
 ## Code Organization
@@ -58,7 +58,7 @@ namespace D3D12
 	...
 }
 ```
-Contains functions for common D3D12 setup operations like Device, Command List, Command Queue, Command Allocator, Fence, Swap Chain, and Root Signature creation. __Note__ that small differences exist in Device and Command List creation when using DXR.
+Contains functions for common D3D12 setup operations like Device, Command List, Command Queue, Command Allocator, Fence, Swap Chain, and Root Signature creation. Note that small differences exist in Device and Command List creation when using DXR.
 
 ### DXR
 ```c++
@@ -74,7 +74,7 @@ namespace DXR
 	...
 }
 ```
-Contains new functionality specific to DirectX Raytracing. This includes acceleration structure creation, shader table allocation and population, ray tracing pipeline state object creation, and ray tracing shader loading and compilation. 
+Contains new functionality specific to DirectX Raytracing. This includes acceleration structure creation, shader table creation and update, ray tracing pipeline state object (RTPSO) creation, and ray tracing shader loading and compilation. 
 
 ## Command Line Arguments
 

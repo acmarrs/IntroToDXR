@@ -104,8 +104,8 @@ struct Material
 
 struct Model
 {
-	vector<Vertex>									vertices;
-	vector<uint32_t>								indices;
+	vector<Vertex> vertices;
+	vector<uint32_t> indices;
 };
 
 struct TextureInfo
