@@ -79,7 +79,7 @@ Contains new functionality specific to DirectX Raytracing. This includes acceler
 ## Command Line Arguments
 
 * `-width [integer]` specifies the width (in pixels) of the rendering window
-* `-height [integer]` specifies the height(in pixels of the rendering window
+* `-height [integer]` specifies the height (in pixels) of the rendering window
 * `-vsync [0|1]` specifies whether vsync is enabled or disabled
 * `-model [path]` specifies the file path to a OBJ model
 
@@ -89,7 +89,7 @@ Once you have a good understanding of how the application works, I encourage you
 * Add antialiasing by casting multiple rays per pixel.
 * Add loading and rendering of models with multiple materials (only a single material is supported now)
 * Add realistic lighting and shading (lighting is currently baked!)
-* Add ray traced shadows. _Extra credit:_ use Any Hit Shaders for shadow rendering
+* Add ray traced shadows. _Extra credit:_ use Any-Hit Shaders for shadow rendering
 * Add ray traced ambient occlusion.
 * Add ray traced reflections for mirror-like materials.
 * Add camera translation and rotation mapped to keyboard and mouse inputs.
