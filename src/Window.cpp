@@ -27,10 +27,12 @@
 
 #include "Window.h"
 
+#include <iostream>
+
 /**
  * Windows message loop.
  */
-LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam ) 
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 {
 	PAINTSTRUCT ps;
     switch( message ) 
@@ -54,7 +56,7 @@ namespace Window
 /**
  * Create a new window.
 */
-HRESULT Create( LONG width, LONG height, HINSTANCE& instance, HWND& window, LPCWSTR title ) 
+HRESULT Create(LONG width, LONG height, HINSTANCE& instance, HWND &window, LPCWSTR title) 
 {
 	// Register the window class
 	WNDCLASSEX wcex;

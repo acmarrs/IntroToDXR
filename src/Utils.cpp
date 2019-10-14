@@ -27,7 +27,14 @@
 
 #pragma once
 
+#define STB_IMAGE_IMPLEMENTATION
 #include "Utils.h"
+
+#include <fstream>
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
+#include <shellapi.h>
+#include <unordered_map>
 
 namespace std
 {
@@ -54,6 +61,8 @@ namespace std
 		}
 	};
 }
+
+using namespace std;
 
 namespace Utils
 {
@@ -96,6 +105,15 @@ HRESULT ParseCommandLine(LPWSTR lpCmdLine, ConfigInfo &config)
 				i++;
 				wcstombs(str, argv[i], 256);
 				config.height = atoi(str);
+				i++;
+				continue;
+			}
+
+			if (strcmp(str, "-vsync") == 0)
+			{
+				i++;
+				wcstombs(str, argv[i], 256);
+				config.vsync = (atoi(str) > 0);
 				i++;
 				continue;
 			}

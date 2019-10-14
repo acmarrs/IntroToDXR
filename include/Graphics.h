@@ -27,9 +27,7 @@
 
 #pragma once
 
-#include "Common.h"
 #include "Structures.h"
-#include "Utils.h"
 
 static const D3D12_HEAP_PROPERTIES UploadHeapProperties =
 {
@@ -80,9 +78,9 @@ namespace D3D12
 	void Create_Command_Allocator(D3D12Global &d3d);
 	void Create_CommandList(D3D12Global &d3d);
 	void Create_Fence(D3D12Global &d3d);
-	void Create_SwapChain(D3D12Global &d3d, HWND window);
+	void Create_SwapChain(D3D12Global &d3d, HWND &window);
 
-	ID3D12RootSignature* Create_Root_Signature(D3D12Global &d3d, const D3D12_ROOT_SIGNATURE_DESC& desc);
+	ID3D12RootSignature* Create_Root_Signature(D3D12Global &d3d, const D3D12_ROOT_SIGNATURE_DESC &desc);
 
 	void Reset_CommandList(D3D12Global &d3d);
 	void Submit_CmdList(D3D12Global &d3d);
@@ -102,7 +100,7 @@ namespace DXR
 	void Create_Closest_Hit_Program(D3D12Global &d3d, DXRGlobal &dxr, D3D12ShaderCompilerInfo &shaderCompiler);
 	void Create_Pipeline_State_Object(D3D12Global &d3d, DXRGlobal &dxr);
 	void Create_Shader_Table(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &resources);
-	void Create_CBVSRVUAV_Heap(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &resources, const Model &model);
+	void Create_Descriptor_Heaps(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &resources, const Model &model);
 	void Create_DXR_Output(D3D12Global &d3d, D3D12Resources &resources);
 
 	void Build_Command_List(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &resources);

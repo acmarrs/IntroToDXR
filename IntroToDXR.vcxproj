@@ -46,6 +46,12 @@
     <ClInclude Include="include\Utils.h" />
     <ClInclude Include="include\Window.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="LICENSES.txt" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{18e80301-0be6-45c6-9e7e-6505dc098dc7}</ProjectGuid>

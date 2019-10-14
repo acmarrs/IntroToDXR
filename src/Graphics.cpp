@@ -25,7 +25,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <wrl.h>
+#include <atlcomcli.h>
+
 #include "Graphics.h"
+#include "Utils.h"
+
+using namespace std;
+using namespace DirectX;
+using Microsoft::WRL::ComPtr;
 
 //--------------------------------------------------------------------------------------
 // Resource Functions
@@ -39,8 +47,6 @@ namespace D3DResources
 */
 void Create_Buffer(D3D12Global &d3d, D3D12BufferCreateInfo& info, ID3D12Resource** ppResource)
 {
-	HRESULT hr;
-
 	D3D12_HEAP_PROPERTIES heapDesc = {};
 	heapDesc.Type = info.heapType;
 	heapDesc.CreationNodeMask = 1;
@@ -60,7 +66,7 @@ void Create_Buffer(D3D12Global &d3d, D3D12BufferCreateInfo& info, ID3D12Resource
 	resourceDesc.Flags = info.flags;
 
 	// Create the GPU resource
-	hr = d3d.device->CreateCommittedResource(&heapDesc, D3D12_HEAP_FLAG_NONE, &resourceDesc, info.state, nullptr, IID_PPV_ARGS(ppResource));
+	HRESULT hr = d3d.device->CreateCommittedResource(&heapDesc, D3D12_HEAP_FLAG_NONE, &resourceDesc, info.state, nullptr, IID_PPV_ARGS(ppResource));
 	Utils::Validate(hr, L"Error: failed to create buffer resource!");
 }
 
@@ -69,11 +75,8 @@ void Create_Buffer(D3D12Global &d3d, D3D12BufferCreateInfo& info, ID3D12Resource
 */
 void Create_Texture(D3D12Global &d3d, D3D12Resources &resources, Material &material) 
 {
-	HRESULT hr;
-	TextureInfo texture;
-
 	// Load the texture
-	texture = Utils::LoadTexture(material.texturePath);
+	TextureInfo texture = Utils::LoadTexture(material.texturePath);
 	material.textureResolution = static_cast<float>(texture.width);
 
 	// Describe the texture
@@ -89,7 +92,7 @@ void Create_Texture(D3D12Global &d3d, D3D12Resources &resources, Material &mater
 	textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 
 	// Create the texture resource
-	hr = d3d.device->CreateCommittedResource(&DefaultHeapProperties, D3D12_HEAP_FLAG_NONE, &textureDesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&resources.texture));
+	HRESULT hr = d3d.device->CreateCommittedResource(&DefaultHeapProperties, D3D12_HEAP_FLAG_NONE, &textureDesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&resources.texture));
 	Utils::Validate(hr, L"Error: failed to create texture!");
 
 	const UINT64 uploadBufferSize = GetRequiredIntermediateSize(resources.texture, 0, 1);
@@ -137,11 +140,11 @@ void Create_Texture(D3D12Global &d3d, D3D12Resources &resources, Material &mater
 */
 void Create_Vertex_Buffer(D3D12Global &d3d, D3D12Resources &resources, Model &model) 
 {
-	// Create the buffer resource from the model's vertices
+	// Create the vertex buffer resource
 	D3D12BufferCreateInfo info(((UINT)model.vertices.size() * sizeof(Vertex)), D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ);
 	Create_Buffer(d3d, info, &resources.vertexBuffer);
-#if defined(_DEBUG)
-	resources.vertexBuffer->SetName(L"VertexBuffer");
+#if NAME_D3D_RESOURCES
+	resources.vertexBuffer->SetName(L"Vertex Buffer");
 #endif
 
 	// Copy the vertex data to the vertex buffer
@@ -167,8 +170,8 @@ void Create_Index_Buffer(D3D12Global &d3d, D3D12Resources &resources, Model &mod
 	// Create the index buffer resource
 	D3D12BufferCreateInfo info((UINT)model.indices.size() * sizeof(UINT), D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ);
 	Create_Buffer(d3d, info, &resources.indexBuffer);
-#if defined(_DEBUG)
-	resources.indexBuffer->SetName(L"IndexBuffer");
+#if NAME_D3D_RESOURCES
+	resources.indexBuffer->SetName(L"Index Buffer");
 #endif
 
 	// Copy the index data to the index buffer
@@ -209,24 +212,19 @@ void Create_BackBuffer_RTV(D3D12Global &d3d, D3D12Resources &resources)
 	for (UINT n = 0; n < 2; n++)
 	{
 		hr = d3d.swapChain->GetBuffer(n, IID_PPV_ARGS(&d3d.backBuffer[n]));
-		if (FAILED(hr)) {
+		if (FAILED(hr)) 
+		{
 			throw runtime_error("Failed to get swap chain buffer!");
 		}
 
 		d3d.device->CreateRenderTargetView(d3d.backBuffer[n], nullptr, rtvHandle);
 
-#if _DEBUG
-		if (n == 0)
-		{
-			d3d.backBuffer[n]->SetName(L"Back Buffer 0");
-		}
-		else
-		{
-			d3d.backBuffer[n]->SetName(L"Back Buffer 1");
-		}
+#if NAME_D3D_RESOURCES
+		if (n == 0) d3d.backBuffer[n]->SetName(L"Back Buffer 0");
+		else d3d.backBuffer[n]->SetName(L"Back Buffer 1");
 #endif
 
-		rtvHandle.ptr += (1 * resources.rtvDescSize);
+		rtvHandle.ptr += resources.rtvDescSize;
 	}
 }
 
@@ -236,7 +234,7 @@ void Create_BackBuffer_RTV(D3D12Global &d3d, D3D12Resources &resources)
 void Create_View_CB(D3D12Global &d3d, D3D12Resources &resources) 
 {
 	Create_Constant_Buffer(d3d, &resources.viewCB, sizeof(ViewCB));
-#if _DEBUG
+#if NAME_D3D_RESOURCES
 	resources.viewCB->SetName(L"View Constant Buffer");
 #endif
 
@@ -252,7 +250,7 @@ void Create_View_CB(D3D12Global &d3d, D3D12Resources &resources)
 void Create_Material_CB(D3D12Global &d3d, D3D12Resources &resources, const Material &material) 
 {
 	Create_Constant_Buffer(d3d, &resources.materialCB, sizeof(MaterialCB));
-#if _DEBUG
+#if NAME_D3D_RESOURCES
 	resources.materialCB->SetName(L"Material Constant Buffer");
 #endif
 
@@ -265,11 +263,11 @@ void Create_Material_CB(D3D12Global &d3d, D3D12Resources &resources, const Mater
 }
 
 /**
-* Create the RTV and sampler descriptor heaps.
+* Create the RTV descriptor heap.
 */
 void Create_Descriptor_Heaps(D3D12Global &d3d, D3D12Resources &resources)
 {
-	// Describe the RTV heap
+	// Describe the RTV descriptor heap
 	D3D12_DESCRIPTOR_HEAP_DESC rtvDesc = {};
 	rtvDesc.NumDescriptors = 2;
 	rtvDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
@@ -278,7 +276,7 @@ void Create_Descriptor_Heaps(D3D12Global &d3d, D3D12Resources &resources)
 	// Create the RTV heap
 	HRESULT hr = d3d.device->CreateDescriptorHeap(&rtvDesc, IID_PPV_ARGS(&resources.rtvHeap));
 	Utils::Validate(hr, L"Error: failed to create RTV descriptor heap!");
-#if _DEBUG
+#if NAME_D3D_RESOURCES
 	resources.rtvHeap->SetName(L"RTV Descriptor Heap");
 #endif
 
@@ -339,8 +337,10 @@ void Destroy(D3D12Resources &resources)
 	SAFE_RELEASE(resources.DXROutput);
 	SAFE_RELEASE(resources.vertexBuffer);
 	SAFE_RELEASE(resources.indexBuffer);
+	SAFE_RELEASE(resources.viewCB);
+	SAFE_RELEASE(resources.materialCB);
 	SAFE_RELEASE(resources.rtvHeap);
-	SAFE_RELEASE(resources.cbvSrvUavHeap);
+	SAFE_RELEASE(resources.descriptorHeap);
 	SAFE_RELEASE(resources.texture);
 	SAFE_RELEASE(resources.textureUploadHeap);
 }
@@ -355,16 +355,16 @@ namespace D3DShaders
 {
 
 /**
-* Compile a D3D HLSL shader using dxcompiler.
+* Compile an HLSL shader using dxcompiler.
 */
 void Compile_Shader(D3D12ShaderCompilerInfo &compilerInfo, D3D12ShaderInfo &info, IDxcBlob** blob) 
 {
 	HRESULT hr;
-	UINT32 codePage(0);
+	UINT32 code(0);
 	IDxcBlobEncoding* pShaderText(nullptr);
 
 	// Load and encode the shader file
-	hr = compilerInfo.library->CreateBlobFromFile(info.filename, &codePage, &pShaderText);
+	hr = compilerInfo.library->CreateBlobFromFile(info.filename, &code, &pShaderText);
 	Utils::Validate(hr, L"Error: failed to create blob from shader file!");
 
 	// Create the compiler include handler
@@ -374,7 +374,18 @@ void Compile_Shader(D3D12ShaderCompilerInfo &compilerInfo, D3D12ShaderInfo &info
 
 	// Compile the shader
 	IDxcOperationResult* result;
-	hr = compilerInfo.compiler->Compile(pShaderText, info.filename, L"", info.targetProfile, nullptr, 0, nullptr, 0, dxcIncludeHandler, &result);
+	hr = compilerInfo.compiler->Compile(
+		pShaderText, 
+		info.filename, 
+		info.entryPoint, 
+		info.targetProfile, 
+		info.arguments, 
+		info.argCount, 
+		info.defines, 
+		info.defineCount, 
+		dxcIncludeHandler, 
+		&result);
+
 	Utils::Validate(hr, L"Error: failed to compile shader!");
 
 	// Verify the result
@@ -402,7 +413,7 @@ void Compile_Shader(D3D12ShaderCompilerInfo &compilerInfo, D3D12ShaderInfo &info
 }
 
 /**
-* Compile a D3D DXRT HLSL shader using dxcompiler.
+* Compile an HLSL ray tracing shader using dxcompiler.
 */
 void Compile_Shader(D3D12ShaderCompilerInfo &compilerInfo, RtProgram &program) 
 {
@@ -488,7 +499,7 @@ void Create_Device(D3D12Global &d3d)
 				continue;
 			}
 
-#if _DEBUG
+#if NAME_D3D_RESOURCES
 			d3d.device->SetName(L"DXR Enabled Device");
 			printf("Running on DXGI Adapter %S\n", adapterDesc.Description);
 #endif
@@ -504,7 +515,7 @@ void Create_Device(D3D12Global &d3d)
 }
 
 /**
-* Create the command queue(s).
+* Create the command queue.
 */
 void Create_Command_Queue(D3D12Global &d3d) 
 {
@@ -514,23 +525,23 @@ void Create_Command_Queue(D3D12Global &d3d)
 
 	HRESULT hr = d3d.device->CreateCommandQueue(&desc, IID_PPV_ARGS(&d3d.cmdQueue));
 	Utils::Validate(hr, L"Error: failed to create command queue!");
-#if _DEBUG
+#if NAME_D3D_RESOURCES
 	d3d.cmdQueue->SetName(L"D3D12 Command Queue");
 #endif
 }
 
 /**
-* Create the command allocator(s) for each frame.
+* Create the command allocator for each frame.
 */
 void Create_Command_Allocator(D3D12Global &d3d) 
 {
-	// Create a command allocator for each frame
 	for (UINT n = 0; n < 2; n++)
 	{
 		HRESULT hr = d3d.device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&d3d.cmdAlloc[n]));
 		Utils::Validate(hr, L"Error: failed to create the command allocator!");
-#if _DEBUG
-		d3d.cmdAlloc[n]->SetName(L"D3D12 Command Allocator");
+#if NAME_D3D_RESOURCES
+		if(n == 0) d3d.cmdAlloc[n]->SetName(L"D3D12 Command Allocator 0");
+		else d3d.cmdAlloc[n]->SetName(L"D3D12 Command Allocator 1");
 #endif
 	}
 }
@@ -540,12 +551,11 @@ void Create_Command_Allocator(D3D12Global &d3d)
 */
 void Create_CommandList(D3D12Global &d3d) 
 {
-	// Create the command list
 	HRESULT hr = d3d.device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, d3d.cmdAlloc[d3d.frameIndex], nullptr, IID_PPV_ARGS(&d3d.cmdList));
 	hr = d3d.cmdList->Close();
 	Utils::Validate(hr, L"Error: failed to create the command list!");
-#if _DEBUG
-	d3d.cmdList->SetName(L"DXR Command List");
+#if NAME_D3D_RESOURCES
+	d3d.cmdList->SetName(L"D3D12 Command List");
 #endif
 }
 
@@ -556,8 +566,8 @@ void Create_Fence(D3D12Global &d3d)
 {
 	HRESULT hr = d3d.device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&d3d.fence));
 	Utils::Validate(hr, L"Error: failed to create fence!");
-#if _DEBUG
-	d3d.fence->SetName(L"D3D12/DXR Fence");
+#if NAME_D3D_RESOURCES
+	d3d.fence->SetName(L"D3D12 Fence");
 #endif
 
 	d3d.fenceValues[d3d.frameIndex]++;
@@ -574,7 +584,7 @@ void Create_Fence(D3D12Global &d3d)
 /**
 * Create the swap chain.
 */
-void Create_SwapChain(D3D12Global &d3d, HWND window) 
+void Create_SwapChain(D3D12Global &d3d, HWND &window) 
 {
 	// Describe the swap chain
 	DXGI_SWAP_CHAIN_DESC1 desc = {};
@@ -586,9 +596,8 @@ void Create_SwapChain(D3D12Global &d3d, HWND window)
 	desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	desc.SampleDesc.Count = 1;
 
-	IDXGISwapChain1* swapChain;
-
 	// Create the swap chain
+	IDXGISwapChain1* swapChain;
 	HRESULT hr = d3d.factory->CreateSwapChainForHwnd(d3d.cmdQueue, window, &desc, nullptr, nullptr, &swapChain);
 	Utils::Validate(hr, L"Error: failed to create swap chain!");
 
@@ -607,13 +616,11 @@ void Create_SwapChain(D3D12Global &d3d, HWND window)
 /**
 * Create a root signature.
 */
-ID3D12RootSignature* Create_Root_Signature(D3D12Global &d3d, const D3D12_ROOT_SIGNATURE_DESC& desc)
+ID3D12RootSignature* Create_Root_Signature(D3D12Global &d3d, const D3D12_ROOT_SIGNATURE_DESC &desc)
 {
-	HRESULT hr;
 	ID3DBlob* sig;
 	ID3DBlob* error;
-
-	hr = D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1, &sig, &error);
+	HRESULT hr = D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1, &sig, &error);
 	Utils::Validate(hr, L"Error: failed to serialize root signature!");
 
 	ID3D12RootSignature* pRootSig;
@@ -626,7 +633,7 @@ ID3D12RootSignature* Create_Root_Signature(D3D12Global &d3d, const D3D12_ROOT_SI
 }
 
 /**
-* Reset the command list(s).
+* Reset the command list.
 */
 void Reset_CommandList(D3D12Global &d3d) 
 {
@@ -657,7 +664,7 @@ void Submit_CmdList(D3D12Global &d3d)
  */
 void Present(D3D12Global &d3d) 
 {
-	HRESULT hr = d3d.swapChain->Present(1, 0);
+	HRESULT hr = d3d.swapChain->Present(d3d.vsync, 0);
 	if (FAILED(hr))
 	{
 		hr = d3d.device->GetDeviceRemovedReason();
@@ -730,7 +737,6 @@ void Destroy(D3D12Global &d3d)
 
 }
 
-
 //--------------------------------------------------------------------------------------
 // DXR Functions
 //--------------------------------------------------------------------------------------
@@ -776,16 +782,16 @@ void Create_Bottom_Level_AS(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &re
 	D3D12BufferCreateInfo bufferInfo(ASPreBuildInfo.ScratchDataSizeInBytes, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	bufferInfo.alignment = max(D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BYTE_ALIGNMENT, D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT);
 	D3DResources::Create_Buffer(d3d, bufferInfo, &dxr.BLAS.pScratch);
-#if _DEBUG
-	dxr.BLAS.pScratch->SetName(L"DXR BLAS Scratch Buffer");
+#if NAME_D3D_RESOURCES
+	dxr.BLAS.pScratch->SetName(L"DXR BLAS Scratch");
 #endif
 
 	// Create the BLAS buffer
 	bufferInfo.size = ASPreBuildInfo.ResultDataMaxSizeInBytes;
 	bufferInfo.state = D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE;
 	D3DResources::Create_Buffer(d3d, bufferInfo, &dxr.BLAS.pResult);
-#if _DEBUG
-	dxr.BLAS.pResult->SetName(L"DXR BLAS Buffer");
+#if NAME_D3D_RESOURCES
+	dxr.BLAS.pResult->SetName(L"DXR BLAS");
 #endif
 
 	// Describe and build the bottom level acceleration structure
@@ -825,8 +831,8 @@ void Create_Top_Level_AS(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &resou
 	instanceBufferInfo.flags = D3D12_RESOURCE_FLAG_NONE;
 	instanceBufferInfo.state = D3D12_RESOURCE_STATE_GENERIC_READ;
 	D3DResources::Create_Buffer(d3d, instanceBufferInfo, &dxr.TLAS.pInstanceDesc);
-#if _DEBUG
-	dxr.TLAS.pInstanceDesc->SetName(L"DXR TLAS Instance Descriptor Buffer");
+#if NAME_D3D_RESOURCES
+	dxr.TLAS.pInstanceDesc->SetName(L"DXR TLAS Instance Descriptors");
 #endif
 
 	// Copy the instance data to the buffer
@@ -858,16 +864,16 @@ void Create_Top_Level_AS(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &resou
 	D3D12BufferCreateInfo bufferInfo(ASPreBuildInfo.ScratchDataSizeInBytes, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	bufferInfo.alignment = max(D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BYTE_ALIGNMENT, D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT);
 	D3DResources::Create_Buffer(d3d, bufferInfo, &dxr.TLAS.pScratch);
-#if _DEBUG
-	dxr.TLAS.pScratch->SetName(L"DXR TLAS Scratch Buffer");
+#if NAME_D3D_RESOURCES
+	dxr.TLAS.pScratch->SetName(L"DXR TLAS Scratch");
 #endif
 
 	// Create the TLAS buffer
 	bufferInfo.size = ASPreBuildInfo.ResultDataMaxSizeInBytes;
 	bufferInfo.state = D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE;
 	D3DResources::Create_Buffer(d3d, bufferInfo, &dxr.TLAS.pResult);
-#if _DEBUG
-	dxr.TLAS.pResult->SetName(L"DXR TLAS Buffer");
+#if NAME_D3D_RESOURCES
+	dxr.TLAS.pResult->SetName(L"DXR TLAS");
 #endif
 
 	// Describe and build the TLAS
@@ -931,8 +937,8 @@ void Create_RayGen_Program(D3D12Global &d3d, DXRGlobal &dxr, D3D12ShaderCompiler
 
 	// Create the root signature
 	dxr.rgs.pRootSignature = D3D12::Create_Root_Signature(d3d, rootDesc);
-#if _DEBUG
-	dxr.rgs.pRootSignature->SetName(L"DXR Ray Generation Root Signature");
+#if NAME_D3D_RESOURCES
+	dxr.rgs.pRootSignature->SetName(L"DXR RGS Root Signature");
 #endif
 }
 
@@ -944,9 +950,6 @@ void Create_Miss_Program(D3D12Global &d3d, DXRGlobal &dxr, D3D12ShaderCompilerIn
 	// Load and compile the miss shader
 	dxr.miss = RtProgram(D3D12ShaderInfo(L"shaders\\Miss.hlsl", L"", L"lib_6_3"));
 	D3DShaders::Compile_Shader(shaderCompiler, dxr.miss);
-
-	// Create an empty root signature
-	dxr.miss.pRootSignature = D3D12::Create_Root_Signature(d3d, {});
 }
 
 /**
@@ -954,52 +957,10 @@ void Create_Miss_Program(D3D12Global &d3d, DXRGlobal &dxr, D3D12ShaderCompilerIn
 */
 void Create_Closest_Hit_Program(D3D12Global &d3d, DXRGlobal &dxr, D3D12ShaderCompilerInfo &shaderCompiler)
 {
-	// Note: since all of our triangles are opaque, we will ignore the any hit program.
-
 	// Load and compile the Closest Hit shader
 	dxr.hit = HitProgram(L"Hit");
 	dxr.hit.chs = RtProgram(D3D12ShaderInfo(L"shaders\\ClosestHit.hlsl", L"", L"lib_6_3"));
 	D3DShaders::Compile_Shader(shaderCompiler, dxr.hit.chs);
-
-	// Describe the root signature
-	D3D12_DESCRIPTOR_RANGE ranges[3];
-
-	ranges[0].BaseShaderRegister = 0;
-	ranges[0].NumDescriptors = 2;
-	ranges[0].RegisterSpace = 0;
-	ranges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
-	ranges[0].OffsetInDescriptorsFromTableStart = 0;
-
-	ranges[1].BaseShaderRegister = 0;
-	ranges[1].NumDescriptors = 1;
-	ranges[1].RegisterSpace = 0;
-	ranges[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
-	ranges[1].OffsetInDescriptorsFromTableStart = 2;
-
-	ranges[2].BaseShaderRegister = 0;
-	ranges[2].NumDescriptors = 4;
-	ranges[2].RegisterSpace = 0;
-	ranges[2].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	ranges[2].OffsetInDescriptorsFromTableStart = 3;
-
-	D3D12_ROOT_PARAMETER param0 = {};
-	param0.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	param0.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-	param0.DescriptorTable.NumDescriptorRanges = _countof(ranges);
-	param0.DescriptorTable.pDescriptorRanges = ranges;
-
-	D3D12_ROOT_PARAMETER rootParams[1] = { param0 };
-
-	D3D12_ROOT_SIGNATURE_DESC rootDesc = {};
-	rootDesc.NumParameters = _countof(rootParams);
-	rootDesc.pParameters = rootParams;
-	rootDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_LOCAL_ROOT_SIGNATURE;
-
-	// Create the root signature
-	dxr.hit.chs.pRootSignature = D3D12::Create_Root_Signature(d3d, rootDesc);
-#if _DEBUG
-	dxr.hit.chs.pRootSignature->SetName(L"DXR Closest Hit Root Signature");
-#endif
 }
 
 /**
@@ -1158,13 +1119,13 @@ void Create_Pipeline_State_Object(D3D12Global &d3d, DXRGlobal &dxr)
 	// Create the RT Pipeline State Object (RTPSO)
 	HRESULT hr = d3d.device->CreateStateObject(&pipelineDesc, IID_PPV_ARGS(&dxr.rtpso));
 	Utils::Validate(hr, L"Error: failed to create state object!");
-	
+#if NAME_D3D_RESOURCES
+	dxr.rtpso->SetName(L"DXR Pipeline State Object");
+#endif
+
 	// Get the RTPSO properties
 	hr = dxr.rtpso->QueryInterface(IID_PPV_ARGS(&dxr.rtpsoInfo));
 	Utils::Validate(hr, L"Error: failed to get RTPSO info object!");
-#if _DEBUG
-	dxr.rtpso->SetName(L"DXR Pipeline State Object");
-#endif
 }
 
 /**
@@ -1174,9 +1135,9 @@ void Create_Shader_Table(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &resou
 {
 	/*
 	The Shader Table layout is as follows:
-	Entry 0 - Ray Generation shader
-	Entry 1 - Miss shader
-	Entry 2 - Closest Hit shader
+		Entry 0 - Ray Generation shader
+		Entry 1 - Miss shader
+		Entry 2 - Closest Hit shader
 	All shader records in the Shader Table must have the same size, so shader record size will be based on the largest required entry.
 	The ray generation program requires the largest entry: 
 		32 bytes - D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES 
@@ -1198,8 +1159,8 @@ void Create_Shader_Table(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &resou
 	// Create the shader table buffer
 	D3D12BufferCreateInfo bufferInfo(shaderTableSize, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ);
 	D3DResources::Create_Buffer(d3d, bufferInfo, &dxr.shaderTable);
-#if _DEBUG
-	dxr.shaderTable->SetName(L"Shader Table");
+#if NAME_D3D_RESOURCES
+	dxr.shaderTable->SetName(L"DXR Shader Table");
 #endif
 
 	// Map the buffer
@@ -1211,7 +1172,7 @@ void Create_Shader_Table(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &resou
 	memcpy(pData, dxr.rtpsoInfo->GetShaderIdentifier(L"RayGen_12"), shaderIdSize);
 
 	// Set the root parameter data. Point to start of descriptor heap.
-	*reinterpret_cast<D3D12_GPU_DESCRIPTOR_HANDLE*>(pData + shaderIdSize) = resources.cbvSrvUavHeap->GetGPUDescriptorHandleForHeapStart();
+	*reinterpret_cast<D3D12_GPU_DESCRIPTOR_HANDLE*>(pData + shaderIdSize) = resources.descriptorHeap->GetGPUDescriptorHandleForHeapStart();
 
 	// Shader Record 1 - Miss program (no local root arguments to set)
 	pData += dxr.shaderTableRecordSize;
@@ -1222,7 +1183,7 @@ void Create_Shader_Table(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &resou
 	memcpy(pData, dxr.rtpsoInfo->GetShaderIdentifier(L"HitGroup"), shaderIdSize);
 
 	// Set the root parameter data. Point to start of descriptor heap.
-	*reinterpret_cast<D3D12_GPU_DESCRIPTOR_HANDLE*>(pData + shaderIdSize) = resources.cbvSrvUavHeap->GetGPUDescriptorHandleForHeapStart();
+	*reinterpret_cast<D3D12_GPU_DESCRIPTOR_HANDLE*>(pData + shaderIdSize) = resources.descriptorHeap->GetGPUDescriptorHandleForHeapStart();
 
 	// Unmap
 	dxr.shaderTable->Unmap(0, nullptr);
@@ -1231,7 +1192,7 @@ void Create_Shader_Table(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &resou
 /**
 * Create the DXR descriptor heap for CBVs, SRVs, and the output UAV.
 */
-void Create_CBVSRVUAV_Heap(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &resources, const Model &model)
+void Create_Descriptor_Heaps(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &resources, const Model &model)
 {
 	// Describe the CBV/SRV/UAV heap
 	// Need 7 entries:
@@ -1248,14 +1209,14 @@ void Create_CBVSRVUAV_Heap(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &res
 	desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
 	// Create the descriptor heap
-	HRESULT hr = d3d.device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&resources.cbvSrvUavHeap));
+	HRESULT hr = d3d.device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&resources.descriptorHeap));
 	Utils::Validate(hr, L"Error: failed to create DXR CBV/SRV/UAV descriptor heap!");
 
 	// Get the descriptor heap handle and increment size
-	D3D12_CPU_DESCRIPTOR_HANDLE handle = resources.cbvSrvUavHeap->GetCPUDescriptorHandleForHeapStart();
+	D3D12_CPU_DESCRIPTOR_HANDLE handle = resources.descriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	UINT handleIncrement = d3d.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-#if _DEBUG
-	resources.cbvSrvUavHeap->SetName(L"DXR Shader Descriptor Heap");
+#if NAME_D3D_RESOURCES
+	resources.descriptorHeap->SetName(L"DXR Descriptor Heap");
 #endif
 
 	// Create the ViewCB CBV
@@ -1350,7 +1311,7 @@ void Create_DXR_Output(D3D12Global &d3d, D3D12Resources &resources)
 	// Create the buffer resource
 	HRESULT hr = d3d.device->CreateCommittedResource(&DefaultHeapProperties, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COPY_SOURCE, nullptr, IID_PPV_ARGS(&resources.DXROutput));
 	Utils::Validate(hr, L"Error: failed to create DXR output buffer!");
-#if _DEBUG
+#if NAME_D3D_RESOURCES
 	resources.DXROutput->SetName(L"DXR Output Buffer");
 #endif
 }
@@ -1380,7 +1341,7 @@ void Build_Command_List(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &resour
 	d3d.cmdList->ResourceBarrier(2, OutputBarriers);
 
 	// Set the UAV/SRV/CBV and sampler heaps
-	ID3D12DescriptorHeap* ppHeaps[] = { resources.cbvSrvUavHeap };
+	ID3D12DescriptorHeap* ppHeaps[] = { resources.descriptorHeap };
 	d3d.cmdList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 
 	// Dispatch rays
@@ -1438,6 +1399,7 @@ void Destroy(DXRGlobal &dxr)
 	SAFE_RELEASE(dxr.BLAS.pInstanceDesc);
 	SAFE_RELEASE(dxr.shaderTable);
 	SAFE_RELEASE(dxr.rgs.blob);
+	SAFE_RELEASE(dxr.rgs.pRootSignature);
 	SAFE_RELEASE(dxr.miss.blob);
 	SAFE_RELEASE(dxr.hit.chs.blob);
 	SAFE_RELEASE(dxr.rtpso);

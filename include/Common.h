@@ -34,8 +34,6 @@
 #include <Windows.h>
 #include <DirectXMath.h>
 #include <DirectXPackedVector.h>
-#include <wrl.h>
-#include <atlcomcli.h>
 
 #include <dxgi1_6.h>
 #include <d3d12.h>
@@ -45,28 +43,12 @@
 
 #include <string>
 #include <vector>
-#include <iostream>
-#include <stdio.h>
-#include <shellapi.h>
-#include <fstream>
-#include <assert.h>
-#include <wtypes.h>
-#include <stdexcept>
-#include <functional>
-#include <set>
-#include <unordered_map>
-#include <algorithm>
-#include <array>
-
-using namespace std;
-using namespace DirectX;
-using namespace DirectX::PackedVector;
-using Microsoft::WRL::ComPtr;
 
 //--------------------------------------------------------------------------------------
 // Macro Defines
 //--------------------------------------------------------------------------------------
 
+#define NAME_D3D_RESOURCES 1
 #define SAFE_RELEASE( x ) { if ( x ) { x->Release(); x = NULL; } }
 #define SAFE_DELETE( x ) { if( x ) delete x; x = NULL; }
 #define SAFE_DELETE_ARRAY( x ) { if( x ) delete[] x; x = NULL; }

@@ -33,16 +33,16 @@
 // Helpers
 //--------------------------------------------------------------------------------------
 
-static bool CompareVector3WithEpsilon(const XMFLOAT3& lhs, const XMFLOAT3& rhs) 
+static bool CompareVector3WithEpsilon(const DirectX::XMFLOAT3& lhs, const DirectX::XMFLOAT3& rhs)
 {
-	const XMFLOAT3 vector3Epsilon = XMFLOAT3(0.00001f, 0.00001f, 0.00001f);
-	return XMVector3NearEqual(XMLoadFloat3(&lhs), XMLoadFloat3(&rhs), XMLoadFloat3(&vector3Epsilon)) == TRUE;
+	const DirectX::XMFLOAT3 vector3Epsilon = DirectX::XMFLOAT3(0.00001f, 0.00001f, 0.00001f);
+	return DirectX::XMVector3NearEqual(DirectX::XMLoadFloat3(&lhs), DirectX::XMLoadFloat3(&rhs), DirectX::XMLoadFloat3(&vector3Epsilon)) == TRUE;
 }
 
-static bool CompareVector2WithEpsilon(const XMFLOAT2& lhs, const XMFLOAT2& rhs)
+static bool CompareVector2WithEpsilon(const DirectX::XMFLOAT2& lhs, const DirectX::XMFLOAT2& rhs)
 {
-	const XMFLOAT2 vector2Epsilon = XMFLOAT2(0.00001f, 0.00001f);
-	return XMVector3NearEqual(XMLoadFloat2(&lhs), XMLoadFloat2(&rhs), XMLoadFloat2(&vector2Epsilon)) == TRUE;
+	const DirectX::XMFLOAT2 vector2Epsilon = DirectX::XMFLOAT2(0.00001f, 0.00001f);
+	return DirectX::XMVector3NearEqual(DirectX::XMLoadFloat2(&lhs), DirectX::XMLoadFloat2(&rhs), DirectX::XMLoadFloat2(&vector2Epsilon)) == TRUE;
 }
 
 //--------------------------------------------------------------------------------------
@@ -51,24 +51,17 @@ static bool CompareVector2WithEpsilon(const XMFLOAT2& lhs, const XMFLOAT2& rhs)
 
 struct ConfigInfo 
 {
-	int			width;
-	int			height;
-	string		model;
-	HINSTANCE	instance;
-
-	ConfigInfo() 
-	{
-		width = 640;
-		height = 360;
-		model = "";
-		instance = NULL;
-	}
+	int				width = 640;
+	int				height = 360;
+	bool			vsync = false;
+	std::string		model = "";
+	HINSTANCE		instance = NULL;
 };
 
 struct Vertex
 {
-	XMFLOAT3 position;
-	XMFLOAT2 uv;
+	DirectX::XMFLOAT3 position;
+	DirectX::XMFLOAT2 uv;
 
 	bool operator==(const Vertex &v) const 
 	{
@@ -90,125 +83,94 @@ struct Vertex
 
 struct Material 
 {
-	string name;
-	string texturePath;
-	float  textureResolution;
-
-	Material() 
-	{
-		name = "defaultMaterial";
-		texturePath = "";
-		textureResolution = 512;
-	}
+	std::string name = "defaultMaterial";
+	std::string texturePath = "";
+	float  textureResolution = 512;
 };
 
 struct Model
 {
-	vector<Vertex> vertices;
-	vector<uint32_t> indices;
+	std::vector<Vertex> vertices;
+	std::vector<uint32_t> indices;
 };
 
 struct TextureInfo
 {
-	vector<UINT8> pixels;
-	int width;
-	int height;
-	int stride;
+	std::vector<UINT8> pixels;
+	int width = 0;
+	int height = 0;
+	int stride = 0;
 };
 
 struct MaterialCB 
 {
-	XMFLOAT4 resolution;
+	DirectX::XMFLOAT4 resolution;
 };
 
 struct ViewCB
 {
-	XMMATRIX view;
-	XMFLOAT4 viewOriginAndTanHalfFovY;
-	XMFLOAT2 resolution;
-
-	ViewCB() 
-	{
-		view = XMMatrixIdentity();
-		viewOriginAndTanHalfFovY = XMFLOAT4(0, 0.f, 0.f, 0.f);
-		resolution = XMFLOAT2(1280, 720);
-	}
+	DirectX::XMMATRIX view = DirectX::XMMatrixIdentity();
+	DirectX::XMFLOAT4 viewOriginAndTanHalfFovY = DirectX::XMFLOAT4(0, 0.f, 0.f, 0.f);
+	DirectX::XMFLOAT2 resolution = DirectX::XMFLOAT2(1280, 720);
 };
 
 //--------------------------------------------------------------------------------------
-// Standard D3D12
+// D3D12
 //--------------------------------------------------------------------------------------
 
 struct D3D12BufferCreateInfo
 {
-	UINT64 size;
-	UINT64 alignment;
-	D3D12_HEAP_TYPE heapType;
-	D3D12_RESOURCE_FLAGS flags;
-	D3D12_RESOURCE_STATES state;
+	UINT64 size = 0;
+	UINT64 alignment = 0;
+	D3D12_HEAP_TYPE heapType = D3D12_HEAP_TYPE_DEFAULT;
+	D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE;
+	D3D12_RESOURCE_STATES state = D3D12_RESOURCE_STATE_COMMON;
 
-	D3D12BufferCreateInfo() :
-		size(0), alignment(0),
-		heapType(D3D12_HEAP_TYPE_DEFAULT),
-		flags(D3D12_RESOURCE_FLAG_NONE),
-		state(D3D12_RESOURCE_STATE_COMMON) {}
+	D3D12BufferCreateInfo() {}
 
-	D3D12BufferCreateInfo(UINT64 InSize, UINT64 InAlignment, D3D12_HEAP_TYPE InHeapType, D3D12_RESOURCE_FLAGS InFlags, D3D12_RESOURCE_STATES InState) :
-		size(InSize), alignment(InAlignment),
+	D3D12BufferCreateInfo(UINT64 InSize, D3D12_RESOURCE_FLAGS InFlags) : size(InSize), flags(InFlags) {}
+
+	D3D12BufferCreateInfo(UINT64 InSize, D3D12_HEAP_TYPE InHeapType, D3D12_RESOURCE_STATES InState) :
+		size(InSize),
 		heapType(InHeapType),
-		flags(InFlags),
 		state(InState) {}
 
 	D3D12BufferCreateInfo(UINT64 InSize, D3D12_RESOURCE_FLAGS InFlags, D3D12_RESOURCE_STATES InState) :
-		size(InSize), alignment(0),
-		heapType(D3D12_HEAP_TYPE_DEFAULT),
+		size(InSize),
 		flags(InFlags),
 		state(InState) {}
 
-	D3D12BufferCreateInfo(UINT64 InSize, D3D12_HEAP_TYPE InHeapType, D3D12_RESOURCE_STATES InState) :
-		size(InSize), alignment(0),
+	D3D12BufferCreateInfo(UINT64 InSize, UINT64 InAlignment, D3D12_HEAP_TYPE InHeapType, D3D12_RESOURCE_FLAGS InFlags, D3D12_RESOURCE_STATES InState) :
+		size(InSize),
+		alignment(InAlignment),
 		heapType(InHeapType),
-		flags(D3D12_RESOURCE_FLAG_NONE),
-		state(InState) {}
-
-	D3D12BufferCreateInfo(UINT64 InSize, D3D12_RESOURCE_FLAGS InFlags) :
-		size(InSize), alignment(0),
-		heapType(D3D12_HEAP_TYPE_DEFAULT),
 		flags(InFlags),
-		state(D3D12_RESOURCE_STATE_COMMON) {}
+		state(InState) {}
 };
 
 struct D3D12ShaderCompilerInfo 
 {
 	dxc::DxcDllSupport		DxcDllHelper;
-	IDxcCompiler*			compiler;
-	IDxcLibrary*			library;
-
-	D3D12ShaderCompilerInfo() 
-	{
-		compiler = nullptr;
-		library = nullptr;
-	}
+	IDxcCompiler*			compiler = nullptr;
+	IDxcLibrary*			library = nullptr;
 };
 
 struct D3D12ShaderInfo 
 {
-	LPCWSTR		filename;
-	LPCWSTR		entryPoint;
-	LPCWSTR		targetProfile;
+	LPCWSTR		filename = nullptr;
+	LPCWSTR		entryPoint = nullptr;
+	LPCWSTR		targetProfile = nullptr;
+	LPCWSTR*	arguments = nullptr;
+	DxcDefine*	defines = nullptr;
+	UINT32		argCount = 0;
+	UINT32		defineCount = 0;
 
-	D3D12ShaderInfo(LPCWSTR inFilename, LPCWSTR inEntryPoint, LPCWSTR inProfile) 
+	D3D12ShaderInfo() {}
+	D3D12ShaderInfo(LPCWSTR inFilename, LPCWSTR inEntryPoint, LPCWSTR inProfile)
 	{
 		filename = inFilename;
 		entryPoint = inEntryPoint;
 		targetProfile = inProfile;
-	}
-
-	D3D12ShaderInfo() 
-	{
-		filename = NULL;
-		entryPoint = NULL;
-		targetProfile = NULL;
 	}
 };
 
@@ -216,53 +178,53 @@ struct D3D12Resources
 {
 	ID3D12Resource*									DXROutput;
 
-	ID3D12Resource*									vertexBuffer;
+	ID3D12Resource*									vertexBuffer = nullptr;
 	D3D12_VERTEX_BUFFER_VIEW						vertexBufferView;
-	ID3D12Resource*									indexBuffer;
+	ID3D12Resource*									indexBuffer = nullptr;
 	D3D12_INDEX_BUFFER_VIEW							indexBufferView;
 
-	ID3D12Resource*									viewCB;
+	ID3D12Resource*									viewCB = nullptr;
 	ViewCB											viewCBData;
-	UINT8*											viewCBStart;
+	UINT8*											viewCBStart = nullptr;
 
-	ID3D12Resource*									materialCB;	
+	ID3D12Resource*									materialCB = nullptr;
 	MaterialCB										materialCBData;	
-	UINT8*											materialCBStart;
+	UINT8*											materialCBStart = nullptr;
 
-	ID3D12DescriptorHeap*							rtvHeap;
-	ID3D12DescriptorHeap*							cbvSrvUavHeap;
+	ID3D12DescriptorHeap*							rtvHeap = nullptr;
+	ID3D12DescriptorHeap*							descriptorHeap = nullptr;
 
-	ID3D12Resource*									texture;
-	ID3D12Resource*									textureUploadHeap;
+	ID3D12Resource*									texture = nullptr;
+	ID3D12Resource*									textureUploadHeap = nullptr;
 
-	UINT											rtvDescSize;
+	UINT											rtvDescSize = 0;
 
-	float											translationOffset;
-	float											rotationOffset;
-	XMFLOAT3										eyeAngle;
-	XMFLOAT3										eyePosition;
+	float											translationOffset = 0;
+	float											rotationOffset = 0;
+	DirectX::XMFLOAT3								eyeAngle;
+	DirectX::XMFLOAT3								eyePosition;
 };
 
 struct D3D12Global
 {
-	IDXGIFactory4*									factory;
-	IDXGIAdapter1*									adapter;
-	ID3D12Device5*									device;
-	ID3D12GraphicsCommandList4*						cmdList;
+	IDXGIFactory4*									factory = nullptr;
+	IDXGIAdapter1*									adapter = nullptr;
+	ID3D12Device5*									device = nullptr;
+	ID3D12GraphicsCommandList4*						cmdList = nullptr;
+	ID3D12CommandQueue*								cmdQueue = nullptr;
+	ID3D12CommandAllocator*							cmdAlloc[2] = { nullptr, nullptr };
 
-	ID3D12CommandQueue*								cmdQueue;
-	ID3D12CommandAllocator*							cmdAlloc[2];
+	IDXGISwapChain3*								swapChain = nullptr;
+	ID3D12Resource*									backBuffer[2] = { nullptr, nullptr };
 
-	IDXGISwapChain3*								swapChain;
-	ID3D12Resource*									backBuffer[2];
-
-	ID3D12Fence*									fence;
-	UINT64											fenceValues[3];
+	ID3D12Fence*									fence = nullptr;
+	UINT64											fenceValues[2] = { 0, 0 };
 	HANDLE											fenceEvent;
-	UINT											frameIndex;
+	UINT											frameIndex = 0;
 
-	int												width;
-	int												height;
+	int												width = 640;
+	int												height = 360;
+	bool											vsync = false;
 };
 
 //--------------------------------------------------------------------------------------
@@ -271,30 +233,34 @@ struct D3D12Global
 
 struct AccelerationStructureBuffer
 {
-	ID3D12Resource* pScratch;
-	ID3D12Resource* pResult;
-	ID3D12Resource* pInstanceDesc;			// only used in top-level AS
-
-	AccelerationStructureBuffer()
-	{
-		pScratch = NULL;
-		pResult = NULL;
-		pInstanceDesc = NULL;
-	}
+	ID3D12Resource* pScratch = nullptr;
+	ID3D12Resource* pResult = nullptr;
+	ID3D12Resource* pInstanceDesc = nullptr;	// only used in top-level AS
 };
 
 struct RtProgram
 {
+	D3D12ShaderInfo			info = {};
+	IDxcBlob*				blob = nullptr;
+	ID3D12RootSignature*	pRootSignature = nullptr;
+
+	D3D12_DXIL_LIBRARY_DESC	dxilLibDesc;
+	D3D12_EXPORT_DESC		exportDesc;
+	D3D12_STATE_SUBOBJECT	subobject;
+	std::wstring			exportName;
+
+	RtProgram()
+	{
+		exportDesc.ExportToRename = nullptr;
+	}
+
 	RtProgram(D3D12ShaderInfo shaderInfo)
 	{
 		info = shaderInfo;
-		blob = nullptr;
 		subobject.Type = D3D12_STATE_SUBOBJECT_TYPE_DXIL_LIBRARY;
 		exportName = shaderInfo.entryPoint;
 		exportDesc.ExportToRename = nullptr;
 		exportDesc.Flags = D3D12_EXPORT_FLAG_NONE;
-
-		pRootSignature = nullptr;
 	}
 
 	void SetBytecode()
@@ -309,25 +275,18 @@ struct RtProgram
 		subobject.pDesc = &dxilLibDesc;
 	}
 
-	RtProgram() 
-	{
-		blob = nullptr;
-		exportDesc.ExportToRename = nullptr;
-		pRootSignature = nullptr;
-	}
-
-	D3D12ShaderInfo			info = {};
-	IDxcBlob*				blob;
-
-	ID3D12RootSignature*	pRootSignature = nullptr;
-	D3D12_DXIL_LIBRARY_DESC	dxilLibDesc;
-	D3D12_EXPORT_DESC		exportDesc;
-	D3D12_STATE_SUBOBJECT	subobject;
-	std::wstring			exportName;
 };
 
 struct HitProgram
 {
+	RtProgram ahs;
+	RtProgram chs;
+
+	std::wstring exportName;
+	D3D12_HIT_GROUP_DESC desc = {};
+	D3D12_STATE_SUBOBJECT subobject = {};
+
+	HitProgram() {}
 	HitProgram(LPCWSTR name) : exportName(name)
 	{
 		desc = {};
@@ -343,14 +302,6 @@ struct HitProgram
 		desc.ClosestHitShaderImport = chs.exportDesc.Name;
 	}
 
-	HitProgram() {}
-
-	RtProgram ahs;
-	RtProgram chs;
-
-	std::wstring exportName;
-	D3D12_HIT_GROUP_DESC desc = {};
-	D3D12_STATE_SUBOBJECT subobject = {};
 };
 
 struct DXRGlobal
@@ -359,13 +310,13 @@ struct DXRGlobal
 	AccelerationStructureBuffer						BLAS;
 	uint64_t										tlasSize;
 
-	ID3D12Resource*									shaderTable;
-	uint32_t										shaderTableRecordSize;
+	ID3D12Resource*									shaderTable = nullptr;
+	uint32_t										shaderTableRecordSize = 0;
 
 	RtProgram										rgs;
 	RtProgram										miss;
 	HitProgram										hit;
 
-	ID3D12StateObject*								rtpso;
-	ID3D12StateObjectProperties*					rtpsoInfo;
+	ID3D12StateObject*								rtpso = nullptr;
+	ID3D12StateObjectProperties*					rtpsoInfo = nullptr;
 };

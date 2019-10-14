@@ -28,7 +28,7 @@ Rendering code lives in `Graphics.h/cpp` and is broken into four namespaces to s
 ```c++
 namespace D3DResources 
 {
-	void Create_Buffer(D3D12Global &d3d, D3D12BufferCreateInfo& info, ID3D12Resource** ppResource);
+	void Create_Buffer(D3D12Global &d3d, D3D12BufferCreateInfo &info, ID3D12Resource** ppResource);
 	void Create_Texture(D3D12Global &d3d, D3D12Resources &resources, Material &material);
 	void Create_Vertex_Buffer(D3D12Global &d3d, D3D12Resources &resources, Model &model);
 	void Create_Index_Buffer(D3D12Global &d3d, D3D12Resources &resources, Model &model);
@@ -80,6 +80,7 @@ Contains new functionality specific to DirectX Raytracing. This includes acceler
 
 * `-width [integer]` specifies the width (in pixels) of the rendering window
 * `-height [integer]` specifies the height(in pixels of the rendering window
+* `-vsync [0|1]` specifies whether vsync is enabled or disabled
 * `-model [path]` specifies the file path to a OBJ model
 
 ## Suggested Exercises

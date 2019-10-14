@@ -25,11 +25,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define STB_IMAGE_IMPLEMENTATION
-#define TINYOBJLOADER_IMPLEMENTATION
-
 #include "Window.h"
 #include "Graphics.h"
+#include "Utils.h"
 
 #ifdef _DEBUG
 #define _CRTDBG_MAP_ALLOC
@@ -52,6 +50,7 @@ public:
 
 		d3d.width = config.width;
 		d3d.height = config.height;
+		d3d.vsync = config.vsync;
 
 		// Load a model
 		Utils::LoadModel(config.model, model, material);
@@ -81,7 +80,7 @@ public:
 		DXR::Create_Bottom_Level_AS(d3d, dxr, resources, model);
 		DXR::Create_Top_Level_AS(d3d, dxr, resources);
 		DXR::Create_DXR_Output(d3d, resources);
-		DXR::Create_CBVSRVUAV_Heap(d3d, dxr, resources, model);	
+		DXR::Create_Descriptor_Heaps(d3d, dxr, resources, model);	
 		DXR::Create_RayGen_Program(d3d, dxr, shaderCompiler);
 		DXR::Create_Miss_Program(d3d, dxr, shaderCompiler);
 		DXR::Create_Closest_Hit_Program(d3d, dxr, shaderCompiler);

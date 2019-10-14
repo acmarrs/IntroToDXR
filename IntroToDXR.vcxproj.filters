@@ -77,4 +77,10 @@
       <Filter>Include\thirdparty</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="LICENSES.txt" />
+  </ItemGroup>
 </Project>
