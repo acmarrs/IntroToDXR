@@ -38,7 +38,6 @@
     <ClInclude Include="include\Common.h" />
     <ClInclude Include="include\Graphics.h" />
     <ClInclude Include="include\Structures.h" />
-    <ClInclude Include="include\thirdparty\d3dx12.h" />
     <ClInclude Include="include\thirdparty\dxc\dxcapi.h" />
     <ClInclude Include="include\thirdparty\dxc\dxcapi.use.h" />
     <ClInclude Include="include\thirdparty\stb_image.h" />

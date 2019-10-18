@@ -73,9 +73,6 @@
     <ClInclude Include="include\Graphics.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\thirdparty\d3dx12.h">
-      <Filter>Include\thirdparty</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

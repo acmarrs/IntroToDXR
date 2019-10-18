@@ -59,6 +59,8 @@ namespace D3DResources
 
 	void Update_View_CB(D3D12Global &d3d, D3D12Resources &resources);
 
+	void Upload_Texture(D3D12Global &d3d, ID3D12Resource* destResource, ID3D12Resource* srcResource, const TextureInfo &texture);
+
 	void Destroy(D3D12Resources &resources);
 }
 

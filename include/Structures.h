@@ -100,6 +100,7 @@ struct TextureInfo
 	int width = 0;
 	int height = 0;
 	int stride = 0;
+	int offset = 0;
 };
 
 struct MaterialCB 
@@ -195,7 +196,7 @@ struct D3D12Resources
 	ID3D12DescriptorHeap*							descriptorHeap = nullptr;
 
 	ID3D12Resource*									texture = nullptr;
-	ID3D12Resource*									textureUploadHeap = nullptr;
+	ID3D12Resource*									textureUploadResource = nullptr;
 
 	UINT											rtvDescSize = 0;
 
