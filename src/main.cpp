@@ -45,7 +45,7 @@ public:
 	void Init(ConfigInfo &config) 
 	{		
 		// Create a new window
-		HRESULT hr = Window::Create(config.width, config.height, config.instance, window, L"Introduction to DXR");
+		HRESULT hr = Window::Create(config.width, config.height, config.instance, window, L"Introduction to DirectX Raytracing (DXR)");
 		Utils::Validate(hr, L"Error: failed to create window!");
 
 		d3d.width = config.width;

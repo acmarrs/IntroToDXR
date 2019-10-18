@@ -27,12 +27,16 @@
 
 #pragma once
 
-#define STB_IMAGE_IMPLEMENTATION
+
 #include "Utils.h"
 
-#include <fstream>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
+
+#include <fstream>
 #include <shellapi.h>
 #include <unordered_map>
 

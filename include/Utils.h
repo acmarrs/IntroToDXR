@@ -29,8 +29,6 @@
 
 #include "Structures.h"
 
-#include <stb_image.h>
-
 namespace Utils
 {
 	HRESULT ParseCommandLine(LPWSTR lpCmdLine, ConfigInfo &config);
@@ -40,8 +38,6 @@ namespace Utils
 	void LoadModel(std::string filepath, Model &model, Material &material);
 
 	void Validate(HRESULT hr, LPWSTR message);
-
-	void FormatTexture(TextureInfo &info, stbi_uc* pixels);
 
 	TextureInfo LoadTexture(std::string filepath);
 }
