@@ -211,15 +211,15 @@ void LoadModel(string filepath, Model &model, Material &material)
 			Vertex vertex = {};
 			vertex.position = 
 			{
-				attrib.vertices[3 * index.vertex_index + 2],				
+				attrib.vertices[3 * index.vertex_index + 2],
 				attrib.vertices[3 * index.vertex_index + 1],
-				attrib.vertices[3 * index.vertex_index + 0]								
+				attrib.vertices[3 * index.vertex_index + 0]
 			};
 
 			vertex.uv = 
 			{
-				1.f - attrib.texcoords[2 * index.texcoord_index + 0],
-				attrib.texcoords[2 * index.texcoord_index + 1]
+				attrib.texcoords[2 * index.texcoord_index + 0],
+				1 - attrib.texcoords[2 * index.texcoord_index + 1]
 			};
 
 			// Fast find unique vertices using a hash
@@ -239,28 +239,27 @@ void LoadModel(string filepath, Model &model, Material &material)
 //--------------------------------------------------------------------------------------
 
 /**
-* Convert a three channel RGB texture to four channel RGBA
+* Format the loaded texture into the layout we use with D3D12.
 */
-void FormatTexture(TextureInfo &info, stbi_uc* pixels)
+void FormatTexture(TextureInfo &info, UINT8* pixels)
 {
-	const UINT rowPitch = info.width * 4;
-	const UINT cellPitch = rowPitch >> 3;				// The width of a cell in the texture.
-	const UINT cellHeight = info.height >> 3;			// The height of a cell in the texture.
-	const UINT textureSize = rowPitch * info.height;
-	const UINT pixelSize = info.width * 3 * info.height;
+	const UINT numPixels = (info.width * info.height);
+	const UINT oldStride = info.stride;
+	const UINT oldSize = (numPixels * info.stride);
 
-	info.pixels.resize(textureSize);
-	info.stride = 4;
+	const UINT newStride = 4;				// uploading textures to GPU as DXGI_FORMAT_R8G8B8A8_UNORM
+	const UINT newSize = (numPixels * newStride);
+	info.pixels.resize(newSize);
 
-	UINT c = (pixelSize - 1);
-	for (UINT n = 0; n < textureSize; n += 4)
+	for (UINT i = 0; i < numPixels; i++)
 	{
-		info.pixels[n] = pixels[c - 2];			// R
-		info.pixels[n + 1] = pixels[c - 1];		// G
-		info.pixels[n + 2] = pixels[c];			// B
-		info.pixels[n + 3] = 0xff;				// A
-		c -= 3;
-	}
+		info.pixels[i * newStride]		= pixels[i * oldStride];		// R
+		info.pixels[i * newStride + 1]	= pixels[i * oldStride + 1];	// G
+		info.pixels[i * newStride + 2]	= pixels[i * oldStride + 2];	// B
+		info.pixels[i * newStride + 3]	= 0xFF;							// A (always 1)
+	}	
+	
+	info.stride = newStride;
 }
 
 /**
@@ -268,11 +267,11 @@ void FormatTexture(TextureInfo &info, stbi_uc* pixels)
 */
 TextureInfo LoadTexture(string filepath) 
 {
-	TextureInfo result;
+	TextureInfo result = {};
 
 	// Load image pixels with stb_image
-	stbi_uc* pixels = stbi_load(filepath.c_str(), &result.width, &result.height, &result.stride, STBI_rgb);
-	if (!pixels) 
+	UINT8* pixels = stbi_load(filepath.c_str(), &result.width, &result.height, &result.stride, STBI_default);
+	if (!pixels)
 	{
 		throw runtime_error("Error: failed to load image!");
 	}

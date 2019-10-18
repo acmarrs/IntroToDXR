@@ -299,6 +299,7 @@ void Update_View_CB(D3D12Global &d3d, D3D12Resources &resources)
 	float x = 2.f * cosf(resources.eyeAngle.x);
 	float y = 0.f;
 	float z = 2.25f + 2.f * sinf(resources.eyeAngle.x);
+
 	focus = XMFLOAT3(0.f, 0.f, 0.f);
 #else
 	float x = 8.f * cosf(resources.eyeAngle.x);
@@ -817,12 +818,12 @@ void Create_Top_Level_AS(D3D12Global &d3d, DXRGlobal &dxr, D3D12Resources &resou
 {
 	// Describe the TLAS geometry instance(s)
 	D3D12_RAYTRACING_INSTANCE_DESC instanceDesc = {};
-	instanceDesc.InstanceID = 0;																		// This value is exposed to shaders as SV_InstanceID
+	instanceDesc.InstanceID = 0;
 	instanceDesc.InstanceContributionToHitGroupIndex = 0;
 	instanceDesc.InstanceMask = 0xFF;
-	instanceDesc.Transform[0][0] = instanceDesc.Transform[1][1] = instanceDesc.Transform[2][2] = 1;		// identity transform
-	instanceDesc.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
+	instanceDesc.Transform[0][0] = instanceDesc.Transform[1][1] = instanceDesc.Transform[2][2] = 1;
 	instanceDesc.AccelerationStructure = dxr.BLAS.pResult->GetGPUVirtualAddress();
+	instanceDesc.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_TRIANGLE_FRONT_COUNTERCLOCKWISE;
 
 	// Create the TLAS instance buffer
 	D3D12BufferCreateInfo instanceBufferInfo;
