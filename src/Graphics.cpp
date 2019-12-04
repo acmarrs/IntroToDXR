@@ -243,10 +243,7 @@ void Create_BackBuffer_RTV(D3D12Global &d3d, D3D12Resources &resources)
 	for (UINT n = 0; n < 2; n++)
 	{
 		hr = d3d.swapChain->GetBuffer(n, IID_PPV_ARGS(&d3d.backBuffer[n]));
-		if (FAILED(hr)) 
-		{
-			throw runtime_error("Failed to get swap chain buffer!");
-		}
+		Utils::Validate(hr, L"Error: failed to get swap chain buffer!");
 
 		d3d.device->CreateRenderTargetView(d3d.backBuffer[n], nullptr, rtvHandle);
 
