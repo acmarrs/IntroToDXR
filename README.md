@@ -12,7 +12,6 @@ The code sample traces primary rays and includes a simple hit shader that sample
 * Windows 10 SDK v1809 (10.0.17763.0) or later. [Download it here.](https://developer.microsoft.com/en-us/windows/downloads/sdk-archive) 
 * Visual Studio 2017, 2019, or VS Code
 
-
 ## Code Organization
 
 Data is passed through the application using structs. These structs are defined in `Structures.h` and are organized into three categories: 
@@ -84,6 +83,8 @@ Contains new functionality specific to DirectX Raytracing. This includes acceler
 * `-model [path]` specifies the file path to a OBJ model
 
 ## Suggested Exercises
+After building and running the code, first thing I recommend you do is load up the Nsight Graphics project file (IntroToDXR.nsight-gfxproj), and capture a frame of the application running. This will provide a clear view of exactly what is happening as the application is running. [You can download Nsight Graphics here](https://developer.nvidia.com/nsight-graphics).
+
 Once you have a good understanding of how the application works, I encourage you to dig deeper into DXR by removing limitations of the current code and adding new rendering features. I suggest:
 
 * Add antialiasing by casting multiple rays per pixel.
